@@ -4,8 +4,6 @@
     cd rails-api
     rails db:create
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
     ### Setup git:
     git remote add origin <github link>
     git branch -M main
@@ -16,11 +14,40 @@ application up and running.
     git push origin main
     git checkout -b 
 
-Things you may want to cover:
     ### Add Rspec
     bundle add rspec-rails
     rails generate rspec:install
 
+
+
+---------------------------------------------------------------------------------
+
+* Story 1: In order to track wildlife sightings, as a user of the API, I need to manage animals.
+
+Branch: animal-crud-actions
+
+Acceptance Criteria
+
+    ✅ Create a resource for animal with the following 
+    information: common name and scientific binomial
+        $ rails g resource Animal common_name:string scientific_bio:string
+
+    ✅ Can see the data response of all the animals
+        def index
+            animal = Animal.all 
+            render json:animals
+         end
+        def show
+            animal = Animal.find(params[:id])
+            render json: animal
+        end
+
+    ✅ Can create a new animal in the database
+        def create
+        animal = Animal.create(animal_params)
+            if animal.valid?
+                render json: animal
+            else 
 
 ---------------------------------------------------------------------------------
 
@@ -61,9 +88,23 @@ Acceptance Criteria
             if animal.valid?
                 render json: animal
             else    
+
                 render json: animal.errors
             end
         end
+
+
+    ✅ Can update an existing animal in the database
+        def update
+        animal = Animal.find(params[:id])
+        animal.update(animal_params)
+            if animal.valid?
+                render json: animal
+            else    
+                render json: animal.errors
+            end
+        end
+
 
     ✅ Can remove an animal entry in the database
         def destroy
@@ -80,6 +121,7 @@ Acceptance Criteria
 Branch: sighting-crud-actions
 
 Acceptance Criteria
+
 
     ✅ Create a resource for animal sightings with the following information: latitude, longitude, date
     Hint: An animal has_many sightings (rails g resource Sighting animal_id:integer ...)
@@ -116,6 +158,15 @@ Acceptance Criteria
                 render json: sighting.errors
             end
         end
+
+    Create a resource for animal sightings with the following information: latitude, longitude, date
+    Hint: An animal has_many sightings (rails g resource Sighting animal_id:integer ...)
+    Hint: Date is written in Active Record as yyyy-mm-dd (“2022-07-28")
+    Can create a new animal sighting in the database
+    Can update an existing animal sighting in the database
+    Can remove an animal sighting in the database
+
+
 
 * Story 3: In order to see the wildlife sightings, as a user of the API, I need to run reports on animal sightings.
 
@@ -159,4 +210,8 @@ Branch: submit-animal-with-sightings
 Acceptance Criteria
 
 Can create new animal along with sighting data in a single API request
+
 Hint: Look into accepts_nested_attributes_for
+
+Hint: Look into accepts_nested_attributes_for
+
