@@ -20,13 +20,6 @@ class AnimalsController < ApplicationController
         else 
             render json: animal.errors
         end
-
-            if animal.valid?
-                render json: animal
-            else 
-                render json: animal.errors
-            end
-
     end
     def update
         animal = Animal.find(params[:id])
