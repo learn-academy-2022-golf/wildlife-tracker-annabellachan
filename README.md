@@ -27,10 +27,12 @@
 Branch: animal-crud-actions
 
 Acceptance Criteria
-
     ✅ Create a resource for animal with the following 
     information: common name and scientific binomial
         $ rails g resource Animal common_name:string scientific_bio:string
+        $ rails routes
+        - rails c
+            - Animal.create common_name:"Bunny", scientific_bio:"Oryctolagus cuniculus"
 
     ✅ Can see the data response of all the animals
         def index
@@ -41,103 +43,82 @@ Acceptance Criteria
             animal = Animal.find(params[:id])
             render json: animal
         end
+        - Postman: Get > localhost:3000/animals > send
 
     ✅ Can create a new animal in the database
         def create
-        animal = Animal.create(animal_params)
-            if animal.valid?
-                render json: animal
-            else 
-
----------------------------------------------------------------------------------
-
-* Story 1: In order to track wildlife sightings, as a user of the API, I need to manage animals.
-
-Branch: animal-crud-actions
-
-Acceptance Criteria
-
-    ✅ Create a resource for animal with the following 
-    information: common name and scientific binomial
-        $ rails g resource Animal common_name:string scientific_bio:string
-
-    ✅ Can see the data response of all the animals
-        def index
-            animal = Animal.all 
-            render json:animals
-         end
-        def show
+            animal = Animal.create(animal_params)
+                if animal.valid?
+                    render json: animal
+                else 
+        - Postman: Post > url:localhost:3000/animals, choose Body, raw, JSON
+            {
+                "common_name": "Dog",
+                "scientific_bio":"Canis familiaris Linnaeus"
+            }
+    ✅  Can update an existing animal in the database
+        def update
             animal = Animal.find(params[:id])
-            render json: animal
+            animal.update(animal_params)
+                if animal.valid?
+                    render json: animal
+                else    
+                    render json: animal.errors
+                end
         end
 
-    ✅ Can create a new animal in the database
-        def create
-        animal = Animal.create(animal_params)
-            if animal.valid?
-                render json: animal
-            else 
-                render json: animal.errors
-            end
-        end
-
-    ✅ Can update an existing animal in the database
-        def update
-        animal = Animal.find(params[:id])
-        animal.update(animal_params)
-            if animal.valid?
-                render json: animal
-            else    
-
-                render json: animal.errors
-            end
-        end
-
-
-    ✅ Can update an existing animal in the database
-        def update
-        animal = Animal.find(params[:id])
-        animal.update(animal_params)
-            if animal.valid?
-                render json: animal
-            else    
-                render json: animal.errors
-            end
-        end
-
-
-    ✅ Can remove an animal entry in the database
+        - Postman: Patch > localhost:3000/animals/id (id # of specific instance) > Body > raw >  JSON
+            {
+                "common_name": "Dog",
+                "scientific_bio":"Canis Familiaris Linnaeus"
+            }
+              **(capitalized the f)
+    ✅  Can remove an animal entry in the database
         def destroy
-        animal = Animal.find(params[:id])
-            if animal.destroy   
-                render json:animal
-            else    
-                render json: animal.errors
-            end
+            animal = Animal.find(params[:id])
+                if animal.destroy   
+                    render json:animal
+                else    
+                    render json: animal.errors
+                end
         end
+
+        - Postman: Delete > localhost:3000/animals/id
+                ** should show the instance that has been deleted and go into console to verify if it has been deleted
+---------------------------------------------------------------------------------
 
 * Story 2: In order to track wildlife sightings, as a user of the API, I need to manage animal sightings.
 
 Branch: sighting-crud-actions
 
 Acceptance Criteria
-
-
     ✅ Create a resource for animal sightings with the following information: latitude, longitude, date
     Hint: An animal has_many sightings (rails g resource Sighting animal_id:integer ...)
     Hint: Date is written in Active Record as yyyy-mm-dd (“2022-07-28")
         $ rails g resource Sighting animal_id:integer latitude:float longtitude:float date:date
+        $ rails routes
+        $ rails db:migrate
+        - rails c
+            - Sightings.create animal_id:22, longitutde:11.1, longitude:22.2, date:20221212
 
     ✅ Can create a new animal sighting in the database
         def index
-        sightings = Sighting.all 
-        render json: sightings
+            sightings = Sighting.all 
+            render json: sightings
+        end
+        def show
+            sighting = Sighting.find(params[:id])
+            render json: sighting
         end
 
-        def show
-        sighting = Sighting.find(params[:id])
-        render json: sighting
-        end
+        - Postman: Get > localhost:3000/sightings > body > raw > json
+            {
+                "animal_id":11, 
+                "latitude":49.3,
+                "longitude: 2.34,
+                "date": 19950524
+            }
+
     ✅ Can update an existing animal sighting in the database
         def update
         sighting = Sighting.find(params[:id])
@@ -149,6 +130,15 @@ Acceptance Criteria
             end
         end
 
+        - Postman: Patch > localhost:3000/sightings/id body > raw > json
+            - changing date from 19950524 > 19950525
+            {
+                "animal_id":11, 
+                "latitude":49.3,
+                "longitude: 2.34,
+                "date": 19950525
+            }
+
     ✅ Can remove an animal sighting in the database
         def destroy
         sighting = Sighting.find(params[:id])
@@ -158,15 +148,9 @@ Acceptance Criteria
                 render json: sighting.errors
             end
         end
-
-    Create a resource for animal sightings with the following information: latitude, longitude, date
-    Hint: An animal has_many sightings (rails g resource Sighting animal_id:integer ...)
-    Hint: Date is written in Active Record as yyyy-mm-dd (“2022-07-28")
-    Can create a new animal sighting in the database
-    Can update an existing animal sighting in the database
-    Can remove an animal sighting in the database
-
-
+        
+        - Postman: Delete > localhost:3000/sightings/id 
+---------------------------------------------------------------------------------
 
 * Story 3: In order to see the wildlife sightings, as a user of the API, I need to run reports on animal sightings.
 
@@ -174,21 +158,64 @@ Branch: animal-sightings-reports
 
 Acceptance Criteria
 
-    Can see one animal with all its associated sightings
+    ✅ Can see one animal with all its associated sightings
     Hint: Checkout this example on how to include associated records
-    Can see all the all sightings during a given time period
+        - Use has_many in in animal.rb
+            class Animal < ApplicationRecord 
+                has_many:sightings
+            end
+        - Use belongs_to in sighting.rb
+            class Sighting < ApplicationRecord
+                belongs_to:animal
+             end
+        - sightings_controller.rb - Update the method by using include: to add animals model
+            def index
+                sightings = Sighting.all 
+                render json: sightings, include:[:animals]
+            end
+        - animals_controller.rb - Update the method by using include: to add sightings
+
+        - Postman: Get localhost:3000/animals/2
+            {
+                "id": 2,
+                "common_name": "Hippo",
+                "scientific_bio": "Hippopotamus amphibius Linnaeus",
+                "created_at": "2022-12-13T22:17:53.256Z",
+                "updated_at": "2022-12-13T22:17:53.256Z",
+                "sightings": [
+                    {
+                        "id": 2,
+                        "animal_id": 2,
+                        "latitude": 49.3,
+                        "longtitude": 2.34,
+                        "date": "1995-05-24",
+                        "created_at": "2022-12-14T01:17:44.455Z",
+                        "updated_at": "2022-12-14T02:16:59.089Z"
+                    }
+                ]
+            }
+
+    ✅ Can see all the all sightings during a given time period
     Hint: Your controller can use a range to look like this:
     class SightingsController < ApplicationController
-    def index
-        sightings = Sighting.where(date: params[:start_date]..params[:end_date])
-        render json: sightings
-    end
-    end
-    Hint: Be sure to add the start_date and end_date to what is permitted in your strong parameters method
-    Hint: Utilize the params section in Postman to ease the developer experience
-    Hint: Routes with params
+            def index
+                sightings = Sighting.where(date: params[:start_date]..params[:end_date])
+                render json: sightings
+            end
 
+    ✅Hint: Be sure to add the start_date and end_date to what is permitted in your strong parameters method
+            private
+            def sighting_params
+                params.require(:sighting).permit(:animal_id, :latitude, :longitude, :date, :start_date, :end_date)
+            end
 
+    ✅Hint: Utilize the params section in Postman to ease the developer experience
+    ✅Hint: Routes with params
+            - Postman: Get > localhost:3000/sightings 
+                - start_date: 20221212
+                - end_date: 20221225    
+        
+---------------------------------------------------------------------------------
 Stretch Challenges
 Story 4: In order to see the wildlife sightings contain valid data, as a user of the API, I need to include proper specs.
 
