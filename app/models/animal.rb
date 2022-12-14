@@ -1,2 +1,3 @@
-class Animal < ApplicationRecord
+class Animal < ApplicationRecord 
+    has_many:sightings
 end
